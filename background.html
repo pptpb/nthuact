@@ -1,0 +1,116 @@
+<html>
+<head>
+<meta charset="utf-8" />
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js"></script> 
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script>
+
+var result;
+var count;
+var errorCode;
+
+function timeStr(time) {
+    return time.substr(0, 10) + ((time.length > 16) ? (' ' + time.substr(11, 5)) : '');
+}
+
+function sortDate(a,b) {
+    return ((new Date(a.start)) < (new Date(b.start)));
+}
+
+//var callback = function(root, index) {
+function processFeed(root, index) {
+    var eventEntries = root.feed.getEntries();
+    result[index] = new Array();
+    console.log('index = ' + index);
+  
+    if (eventEntries.length > 0) {
+        for (var i = 0; i < eventEntries.length; i++) {
+            var event = eventEntries[i];
+            result[index][i] = {};
+            result[index][i].title = event.getTitle().getText();
+            result[index][i].content = event.getContent().getText();
+            var stime = event.getTimes()[0];
+            result[index][i].start = timeStr(stime.startTime);
+            result[index][i].end = timeStr(stime.endTime);
+            result[index][i].weekday = new Date(result[index][i].start).getDay();
+
+//            console.log(event.getLink());
+//            console.log('Event title = ' + result[index][i].title);
+//            console.log('    content = ' + result[index][i].content);
+//            console.log('       time = ' + result[index][i].start + ' -> ' + result[index][i].end);
+        }
+        result[index].sort(sortDate);
+    } else {
+        console.log('no events are matched from the query!');
+        errorCode[index] = 'no events are matched from the query!';
+    }
+}
+
+var handleError = function(error) {
+//function handleError(error, index) {
+    console.log(error);
+//    errorCode[index] = 'Cannot parse feed.';
+}
+
+function num2Digit(num) {
+    if (num < 10)
+        return ('0' + num);
+    else
+        return ('' + num);
+}
+
+function getMyFeed() {
+    var feedURI = new Array(
+        's9e1a529aoocaftbplhlnbald0%40group.calendar.google.com', // 演講
+        '7iqa3fc4nd9vvftj0qdqh45cv0%40group.calendar.google.com', // 社團
+        'l083bdahoa4kouvjshg8d8km78%40group.calendar.google.com', // 藝文
+        '2pofg6hk707igmjdm3g4guc7a8%40group.calendar.google.com', // 電影
+        'n8ibrkgfgim0keq60k4vgpns6k%40group.calendar.google.com', // 學校大事
+        '4ui33dkb02vgvkbg4h8gl6b4mg%40group.calendar.google.com', // 其他活動
+        'nthu.acad%40gmail.com');   // 99～100學年度行事曆
+    var cb = new Array(
+        function(root){processFeed(root, 0);},
+        function(root){processFeed(root, 1);},
+        function(root){processFeed(root, 2);},
+        function(root){processFeed(root, 3);},
+        function(root){processFeed(root, 4);},
+        function(root){processFeed(root, 5);},
+        function(root){processFeed(root, 6);});
+
+    var now = new Date();
+    var timeStr = now.getFullYear() + '-' + num2Digit(now.getMonth() + 1) + '-' + num2Digit(now.getDate()) + 'T' + num2Digit(now.getHours()) + ':' + num2Digit(now.getMinutes()) + ':' + num2Digit(now.getSeconds()) + '.000+08:00';
+    console.log(timeStr);
+    var startMin = google.gdata.DateTime.fromIso8601(timeStr);//google.gdata.DateTime.getDate());
+    console.log(startMin);
+
+    result = new Array();
+    errorCode = new Array();
+
+    for (count = 0; count < feedURI.length; count++) {
+        var calendarService = new google.gdata.calendar.CalendarService('GoogleInc-jsguide-1.0');
+        var query = new google.gdata.calendar.CalendarEventQuery('http://www.google.com/calendar/feeds/' + feedURI[count] + '/public/full');
+
+        query.setMinimumStartTime(startMin);
+        //var searchText = 'JS-Client';
+        //query.setFullTextQuery(searchText);
+        calendarService.getEventsFeed(query, cb[count], handleError);
+    }
+}
+
+function startRequest() {
+    getMyFeed();
+}
+
+function scheduleRequest() {
+	var reqeustInterval = 1000 * 60 * 60;
+	console.log("Scheduling request...");
+	window.setInterval(startRequest, reqeustInterval);
+}
+
+google.load("gdata", "1");
+google.setOnLoadCallback(getMyFeed);
+scheduleRequest();
+
+</script>
+</head>
+</html>

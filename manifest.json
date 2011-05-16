@@ -1,0 +1,19 @@
+{
+   "background_page": "background.html",
+   "browser_action": {
+      "default_icon": "images/icon_32.png",
+      "default_popup": "popup.html",
+      "default_title": "清大活動行事曆"
+   },
+   "description": "快速瀏覽近期內清大校園將舉辦的各項活動",
+   "icons": {
+      "128": "images/icon_128.png",
+      "16": "images/icon_16.png",
+      "32": "images/icon_32.png",
+      "64": "images/icon_64.png"
+   },
+   "name": "清大活動行事曆",
+   "permissions": [ "tabs", "http://ajax.googleapis.com/*", "http://www.google.com/jsapi", "http://www.google.com/calendar/feeds/*" ],
+   "popup": "popup.html",
+   "version": "0.16"
+}

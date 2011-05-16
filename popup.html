@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<link type="text/css" rel="stylesheet" href="style.css" /> 
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js"></script> 
+<script>
+var result;
+var errorCode;
+
+function goToURL(msg) {
+    console.log("Calling goToURL("+msg+")");
+    chrome.tabs.create({url: msg});
+}
+
+function loadPage(ulElement, index) {
+    var weeks = new Array('日', '一', '二', '三', '四', '五', '六');
+
+    if (result[index] != undefined) {
+        for (i = 0; i < result[index].length; i++) {
+            $('<li></li>').html('<strong>星期' + weeks[result[index][i].weekday] + ' - ' + result[index][i].start + ' ~ ' + result[index][i].end + '</strong><br />' + result[index][i].title + ': ' + result[index][i].content).insertAfter($(ulElement + ' li.hidden'));
+        }
+    }
+    else {
+        $(ulElement).html('<strong>' + errorCode[index] + '</strong>');
+    }
+
+    $('ul.event').css('display', 'none');
+    $(ulElement).css('display', 'block');
+    $('div#lists a[href^="http"]').click(function() {
+        setTimeout('window.close();',150);goToURL($(this).attr('href'));
+    });
+}
+
+
+function renderPage() {
+    result=chrome.extension.getBackgroundPage().result;
+    errorCode=chrome.extension.getBackgroundPage().errorCode;
+
+    $('ul#events li').click(function() {
+        $('ul#events li.selected').removeClass('selected');
+        $(this).addClass('selected');
+    });
+    $('li#talk-events').click(function(){loadPage('ul#talk-event', 0)});
+    $('li#club-events').click(function(){loadPage('ul#club-event', 1)});
+    $('li#arts-events').click(function(){loadPage('ul#arts-event', 2)});
+    $('li#movie-events').click(function(){loadPage('ul#movie-event', 3)});
+    $('li#campus-events').click(function(){loadPage('ul#campus-event', 4)});
+    $('li#others-events').click(function(){loadPage('ul#others-event', 5)});
+    $('li#official-events').click(function(){loadPage('ul#official-event', 6)});
+
+    loadPage('ul#club-event', 1);
+    $('ul#club-event').css('display', 'block');
+    $('li#club-events').addClass('selected');
+    $('footer a[href^="http"]').click(function() {
+        setTimeout('window.close();',150);goToURL($(this).attr('href'));
+    });
+}
+</script>
+</head>
+<body onload="renderPage();">
+<div id=lists>
+
+<ul id="events">
+    <li id="campus-events">校園</li>
+    <li id="talk-events">演講</li>
+    <li id="club-events">社團</li>
+    <li id="arts-events">藝文</li>
+    <li id="movie-events">電影</li>
+    <li id="others-events">其他</li>
+<!--
+    <li id="official-events">校務</li>
+    <li id="search-tab">校務</li>
+-->
+</ul>
+
+<ul id="campus-event" class="event"><li class=hidden></li></ul>
+<ul id="talk-event" class="event"><li class=hidden></li></ul>
+<ul id="club-event" class="event"><li class=hidden></li></ul>
+<ul id="arts-event" class="event"><li class=hidden></li></ul>
+<ul id="movie-event" class="event"><li class=hidden></li></ul>
+<ul id="others-event" class="event"><li class=hidden></li></ul>
+<!--
+<ul id="official-event" class="event"><li class=hidden></li></ul>
+<ul id="search-page" class="form"><li class=hidden></li></ul>
+-->
+
+</div>
+<footer>Powered by <a href="http://meinews.cc">梅心聞</a> - 2001 &copy; meinews.cc - <a href=http://meinews.cc/calendar>新增活動</a></footer>
+</body> 
+</html>
