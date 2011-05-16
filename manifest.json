@@ -1,4 +1,4 @@
-{
+
    "background_page": "background.html",
    "browser_action": {
       "default_icon": "images/icon_32.png",
